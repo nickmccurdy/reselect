@@ -207,7 +207,7 @@ suite('selector', () => {
     const selector2 = createSelector(
       (param, y) => param.sub.value + param.x + y,
       selector1,
-      (state, props) => props.y,
+      (state, props) => props.y
     )
     const state1 = { sub: {  value: 1 } }
     assert.equal(selector2(state1, { x: 100, y: 200 }), 301)
@@ -221,12 +221,12 @@ suite('selector', () => {
     const selector1 = createSelector(
       (sub, x) => ({ sub, x }),
       state => state.sub,
-      (state, props, another) => props.x + another,
+      (state, props, another) => props.x + another
     )
     const selector2 = createSelector(
       (param, y) => param.sub.value + param.x + y,
       selector1,
-      (state, props) => props.y,
+      (state, props) => props.y
     )
     const state1 = { sub: {  value: 1 } }
     assert.equal(selector2(state1, { x: 100, y: 200 }, 100), 401)
