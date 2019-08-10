@@ -154,7 +154,7 @@ suite('selector', () => {
   test('recomputes result after exception', () => {
     let called = 0
     const selector = createSelector(
-       () => {
+      () => {
         called++
         throw Error('test error')
       },
