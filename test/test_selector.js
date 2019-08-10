@@ -17,8 +17,8 @@ for (let i = 0; i < numOfStates; i++) {
 suite('selector', () => {
   test('basic selector', () => {
     const selector = createSelector(
-      state => state.a,
-      a => a
+      a => a,
+      state => state.a
     )
     const firstState = { a: 1 }
     const firstStateNewPointer = { a: 1 }
@@ -34,16 +34,16 @@ suite('selector', () => {
   })
   test('don\'t pass extra parameters to inputSelector when only called with the state', () => {
     const selector = createSelector(
-      (...params) => params.length,
-      a => a
+      a => a,
+      (...params) => params.length
     )
     assert.equal(selector({}), 1)
   })
   test('basic selector multiple keys', () => {
     const selector = createSelector(
+      (a, b) => a + b,
       state => state.a,
-      state => state.b,
-      (a, b) => a + b
+      state => state.b
     )
     const state1 = { a: 1, b: 2 }
     assert.equal(selector(state1), 3)
@@ -56,9 +56,9 @@ suite('selector', () => {
   })
   test('basic selector invalid input selector', () => {
     assert.throw(() => createSelector(
+      (a, b) => a + b,
       state => state.a,
-      'not a function',
-      (a, b) => a + b
+      'not a function'
     ), /input-selectors to be functions.*function, string/)
   })
   test('basic selector cache hit performance', () => {
@@ -67,9 +67,9 @@ suite('selector', () => {
     }
 
     const selector = createSelector(
+      (a, b) => a + b,
       state => state.a,
-      state => state.b,
-      (a, b) => a + b
+      state => state.b
     )
     const state1 = { a: 1, b: 2 }
 
@@ -93,9 +93,9 @@ suite('selector', () => {
     }
 
     const selector = createSelector(
+      (a, b) => a + b,
       state => state.a,
-      state => state.b,
-      (a, b) => a + b
+      state => state.b
     )
 
     const start = new Date()
@@ -114,8 +114,8 @@ suite('selector', () => {
   })
   test('memoized composite arguments', () => {
     const selector = createSelector(
-      state => state.sub,
-        sub => sub
+      sub => sub,
+      state => state.sub
     )
     const state1 = {  sub: {  a: 1  }  }
     assert.deepEqual(selector(state1), {  a: 1  })
@@ -141,24 +141,24 @@ suite('selector', () => {
   test('can accept props', () => {
     let called = 0
     const selector = createSelector(
-      state => state.a,
-      state => state.b,
-      (state, props) => props.c,
       (a, b, c) => {
         called++
         return a + b + c
-      }
+      },
+      state => state.a,
+      state => state.b,
+      (state, props) => props.c
     )
     assert.equal(selector({ a: 1, b: 2 }, { c: 100 }), 103)
   })
   test('recomputes result after exception', () => {
     let called = 0
     const selector = createSelector(
-      state => state.a,
-      () => {
+       () => {
         called++
         throw Error('test error')
-      }
+      },
+      state => state.a
     )
     assert.throw(() => selector({ a: 1 }), 'test error')
     assert.throw(() => selector({ a: 1 }), 'test error')
@@ -167,12 +167,12 @@ suite('selector', () => {
   test('memoizes previous result before exception', () => {
     let called = 0
     const selector = createSelector(
-      state => state.a,
       a => {
         called++
         if (a > 1) throw Error('test error')
         return a
-      }
+      },
+      state => state.a
     )
     const state1 = { a: 1 }
     const state2 = { a: 2 }
@@ -183,12 +183,12 @@ suite('selector', () => {
   })
   test('chained selector', () => {
     const selector1 = createSelector(
-      state => state.sub,
-      sub => sub
+      sub => sub,
+      state => state.sub
     )
     const selector2 = createSelector(
-      selector1,
-      sub => sub.value
+      sub => sub.value,
+      selector1
     )
     const state1 = { sub: {  value: 1 } }
     assert.equal(selector2(state1), 1)
@@ -200,14 +200,14 @@ suite('selector', () => {
   })
   test('chained selector with props', () => {
     const selector1 = createSelector(
+      (sub, x) => ({ sub, x }),
       state => state.sub,
-      (state, props) => props.x,
-      (sub, x) => ({ sub, x })
+      (state, props) => props.x
     )
     const selector2 = createSelector(
+      (param, y) => param.sub.value + param.x + y,
       selector1,
       (state, props) => props.y,
-      (param, y) => param.sub.value + param.x + y
     )
     const state1 = { sub: {  value: 1 } }
     assert.equal(selector2(state1, { x: 100, y: 200 }), 301)
@@ -219,14 +219,14 @@ suite('selector', () => {
   })
   test('chained selector with variadic args', () => {
     const selector1 = createSelector(
+      (sub, x) => ({ sub, x }),
       state => state.sub,
       (state, props, another) => props.x + another,
-      (sub, x) => ({ sub, x })
     )
     const selector2 = createSelector(
+      (param, y) => param.sub.value + param.x + y,
       selector1,
       (state, props) => props.y,
-      (param, y) => param.sub.value + param.x + y
     )
     const state1 = { sub: {  value: 1 } }
     assert.equal(selector2(state1, { x: 100, y: 200 }, 100), 401)
@@ -243,8 +243,8 @@ suite('selector', () => {
       (a, b) => typeof a === typeof b
     )
     const selector = createOverridenSelector(
-      state => state.a,
-      a => a
+      a => a,
+      state => state.a
     )
     assert.equal(selector({ a: 1 }), 1)
     assert.equal(selector({ a: 2 }), 1) // yes, really true
@@ -259,9 +259,9 @@ suite('selector', () => {
       hashFn
     )
     const selector = customSelectorCreator(
+      (a, b) => a + b,
       state => state.a,
-      state => state.b,
-      (a, b) => a + b
+      state => state.b
     )
     assert.equal(selector({ a: 1, b: 2 }), 3)
     assert.equal(selector({ a: 1, b: 2 }), 3)
@@ -388,8 +388,8 @@ suite('selector', () => {
   })
   test('resetRecomputations', () => {
     const selector = createSelector(
-      state => state.a,
-      a => a
+      a => a,
+      state => state.a
     )
     assert.equal(selector({ a: 1 }), 1)
     assert.equal(selector({ a: 1 }), 1)
@@ -409,8 +409,8 @@ suite('selector', () => {
   test('export last function as resultFunc', () => {
     const lastFunction = () => {}
     const selector = createSelector(
-      state => state.a,
-      lastFunction
+      lastFunction,
+      state => state.a
     )
     assert.equal(selector.resultFunc, lastFunction)
   })
@@ -419,9 +419,9 @@ suite('selector', () => {
     const dependency2 = (state) => { state.a }
 
     const selector = createSelector(
+      () => {},
       dependency1,
-      dependency2,
-      () => {}
+      dependency2
     )
     assert.deepEqual(selector.dependencies, [
       dependency1,

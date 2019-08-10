@@ -52,7 +52,7 @@ function getDependencies(funcs) {
 export function createSelectorCreator(memoize, ...memoizeOptions) {
   return (...funcs) => {
     let recomputations = 0
-    const resultFunc = funcs.pop()
+    const resultFunc = Array.isArray(funcs[0]) ? funcs.pop() : funcs.shift()
     const dependencies = getDependencies(funcs)
 
     const memoizedResultFunc = memoize(
